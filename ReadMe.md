@@ -3,6 +3,8 @@ https://github.com/JChristensen/Timezone
 ReadMe file  
 Jack Christensen Mar 2012  
 
+Fixed date support Manuel Azevedo Sep 2017
+
 ![CC BY-SA](http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by-sa.png)
 
 ## Introduction ##

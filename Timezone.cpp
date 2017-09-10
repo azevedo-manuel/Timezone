@@ -161,27 +161,39 @@ time_t Timezone::toTime_t(TimeChangeRule r, int yr)
 {
     tmElements_t tm;
     time_t t;
-    uint8_t m, w;            //temp copies of r.month and r.week
+    uint8_t m, w, d ;            //temp copies of r.month, r.week and r.dow
 
     m = r.month;
     w = r.week;
-    if (w == 0) {            //Last week = 0
-        if (++m > 12) {      //for "Last", go to the next month
-            m = 1;
-            yr++;
-        }
-        w = 1;               //and treat as first week of next month, subtract 7 days later
-    }
+    d = r.dow;
+    
+    if (d > tzFixedRuleOffset) {	      // Fixed date (tzFixedRuleOffset+dom)
+	tm.Hour   = r.hour;
+	tm.Minute = 0;
+	tm.Second = 0;
+	tm.Day    = d - tzFixedRuleOffset;
+	tm.Month  = m;
+	tm.Year   = yr - 1970;
+	t = makeTime(tm);
+    } else {
+	if (w == 0) {            //Last week = 0
+	    if (++m > 12) {      //for "Last", go to the next month
+		m = 1;
+		yr++;
+	    }
+	    w = 1;               //and treat as first week of next month, subtract 7 days later
+	}
 
-    tm.Hour = r.hour;
-    tm.Minute = 0;
-    tm.Second = 0;
-    tm.Day = 1;
-    tm.Month = m;
-    tm.Year = yr - 1970;
-    t = makeTime(tm);        //first day of the month, or first day of next month for "Last" rules
-    t += (7 * (w - 1) + (r.dow - weekday(t) + 7) % 7) * SECS_PER_DAY;
-    if (r.week == 0) t -= 7 * SECS_PER_DAY;    //back up a week if this is a "Last" rule
+	tm.Hour = r.hour;
+	tm.Minute = 0;
+	tm.Second = 0;
+	tm.Day = 1;
+	tm.Month = m;
+	tm.Year = yr - 1970;
+	t = makeTime(tm);        //first day of the month, or first day of next month for "Last" rules
+	t += (7 * (w - 1) + (r.dow - weekday(t) + 7) % 7) * SECS_PER_DAY;
+	if (r.week == 0) t -= 7 * SECS_PER_DAY;    //back up a week if this is a "Last" rule
+    }    
     return t;
 }
 

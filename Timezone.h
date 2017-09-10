@@ -59,3 +59,7 @@ class Timezone
         time_t _stdLoc;         //std time start for given/current year, given in local time
 };
 #endif
+
+// When using fixed date rules, the dow should be dom+tzFixedRuleOffset
+
+const uint8_t tzFixedRuleOffset       = 10;

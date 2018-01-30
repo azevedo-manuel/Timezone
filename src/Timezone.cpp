@@ -156,32 +156,44 @@ void Timezone::calcTimeChanges(int yr)
  *----------------------------------------------------------------------*/
 time_t Timezone::toTime_t(TimeChangeRule r, int yr)
 {
-    uint8_t m = r.month;     // temp copies of r.month and r.week
+    uint8_t m = r.month;     // temp copies of r.month, r.week and r.dow
     uint8_t w = r.week;
-    if (w == 0)              // is this a "Last week" rule?
-    {
-        if (++m > 12)        // yes, for "Last", go to the next month
-        {
-            m = 1;
-            ++yr;
-        }
-        w = 1;               // and treat as first week of next month, subtract 7 days later
-    }
-
-    // calculate first day of the month, or for "Last" rules, first day of the next month
+    uint8_t d = r.dow;
     tmElements_t tm;
-    tm.Hour = r.hour;
-    tm.Minute = 0;
-    tm.Second = 0;
-    tm.Day = 1;
-    tm.Month = m;
-    tm.Year = yr - 1970;
-    time_t t = makeTime(tm);
+    time_t t;
+    
+    if (d > tzFixedRuleOffset) {	      // Fixed date (tzFixedRuleOffset+dom)
+	tm.Hour   = r.hour;
+	tm.Minute = 0;
+	tm.Second = 0;
+	tm.Day    = d - tzFixedRuleOffset;
+	tm.Month  = m;
+	tm.Year   = yr - 1970;
+	t = makeTime(tm);
+    } else {
+	if (w == 0) {            // is this a "Last week" rule?
+	    if (++m > 12) {      // yes, for "Last", go to the next month
+            	m = 1;
+            	++yr;
+	    }
+	    w = 1;               // and treat as first week of next month, subtract 7 days later
+    	}
+	
 
-    // add offset from the first of the month to r.dow, and offset for the given week
-    t += ( (r.dow - weekday(t) + 7) % 7 + (w - 1) * 7 ) * SECS_PER_DAY;
-    // back up a week if this is a "Last" rule
-    if (r.week == 0) t -= 7 * SECS_PER_DAY;
+    	// calculate first day of the month, or for "Last" rules, first day of the next month
+    	tm.Hour = r.hour;
+    	tm.Minute = 0;
+    	tm.Second = 0;
+    	tm.Day = 1;
+    	tm.Month = m;
+    	tm.Year = yr - 1970;
+    	t = makeTime(tm);
+
+    	// add offset from the first of the month to r.dow, and offset for the given week
+    	t += ( (r.dow - weekday(t) + 7) % 7 + (w - 1) * 7 ) * SECS_PER_DAY;
+    	// back up a week if this is a "Last" rule
+    	if (r.week == 0) t -= 7 * SECS_PER_DAY;
+    }
     return t;
 }
 

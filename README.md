@@ -61,6 +61,31 @@ TimeChangeRule usEST = {"EST", First, Sun, Nov, 2, -300};   //UTC - 5 hours
 For a time zone that does not change to daylight/summer time, pass the same rule twice to the constructor, for example:  
 `Timezone usAZ(usMST, usMST);`
 
+## Coding Fixed date TimeChangeRules ##
+Some countries do not follow a rule based approach, but a fixed date approach.
+In order not to break compatibility with the library, you can use the *TimeChangeRule** in a little different way:
+
+`TimeChangeRule myRule = {abbrev, __ignore__ , day, month, hour, offset);`
+
+Where:
+**abbrev** is a character string abbreviation for the time zone; it must be no longer than five characters.
+
+**ignore** this value is ignored. Best if you leave it as '0'.
+
+**day** day of the month - this must be coded as `dayOfMonth+tzFixedRuleOffset` so it does not overlap with day of the week on the standard rule
+
+**hour** is the hour in local time that the rule starts (0-23).
+
+**offset** is the UTC offset _in minutes_ for the time zone being defined.
+
+For Iran's DST, which starts on March 22nd to September 22nd at 01:00, the **TimeChangeRule**s could be defined as follows:
+```c++
+TimeChangeRule irST = {"IRST", 0, 22+tzFixedRuleOffset, Mar, 1, 210}; //UTC + 3:30 hours
+TimeChangeRule irDT = {"IRDT", 0, 22+tzFixedRuleOffset, Sep, 1, 270}; //UTC + 3:30 hours
+```
+
+
+
 ## Coding Timezone objects
 There are two ways to define **Timezone** objects.
 
